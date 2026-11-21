@@ -1,0 +1,45 @@
+{
+  "timeout": 3600000,
+  "pkgManagers": {
+    "rust": {
+      "version": true,
+      "postversion": {
+        "command": "cargo generate-lockfile",
+        "runFromRoot": true
+      },
+      "getPublishedVersion": "node ../../.scripts/package-latest-version.js ${ pkg.pkg } ${ pkgFile.version }",
+      "publish": [
+        {
+          "command": "cargo build --locked --release --target i686-pc-windows-msvc",
+          "dryRunCommand": true
+        },
+        {
+          "command": "cargo build --locked --release --target x86_64-pc-windows-msvc",
+          "dryRunCommand": true
+        },
+        {
+          "command": "pwsh -NoProfile -File ../../.scripts/generate-checksums.ps1 -Package ${ pkg.pkg } -Version ${ pkgFile.version }",
+          "dryRunCommand": true,
+          "pipe": true
+        }
+      ]
+    }
+  },
+  "packages": {
+    "inno_semvercompare": {
+      "path": "./crates/inno-semvercompare",
+      "manager": "rust",
+      "releaseTag": "inno-semvercompare-v${ pkgFile.version }",
+      "assets": [
+        {
+          "path": "target/i686-pc-windows-msvc/release/${ pkg.pkg }.dll",
+          "name": "inno-semvercompare-${ pkgFile.version }-x86.dll"
+        },
+        {
+          "path": "target/x86_64-pc-windows-msvc/release/${ pkg.pkg }.dll",
+          "name": "inno-semvercompare-${ pkgFile.version }-x64.dll"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,58 @@
+# Copyright 2022-2022 Tauri Programme within The Commons Conservancy
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT
+
+name: version or publish
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  version-or-publish:
+    runs-on: windows-latest
+    timeout-minutes: 65
+    outputs:
+      change: ${{ steps.covector.outputs.change }}
+      commandRan: ${{ steps.covector.outputs.commandRan }}
+      successfulPublish: ${{ steps.covector.outputs.successfulPublish }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: i686-pc-windows-msvc,x86_64-pc-windows-msvc
+
+      - name: git config
+        run: |
+          git config --global user.name "${{ github.event.pusher.name }}"
+          git config --global user.email "${{ github.event.pusher.email }}"
+
+      - name: covector version or publish (publish when no change files present)
+        uses: jbolda/covector/packages/action@covector-v0
+        id: covector
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          command: 'version-or-publish'
+          createRelease: true
+          recognizeContributors: true
+
+      - name: Create Pull Request With Versions Bumped
+        if: steps.covector.outputs.commandRan == 'version'
+        uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # 8.1.3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: release/version-updates
+          title: Apply Version Updates From Current Changes
+          commit-message: 'apply version updates'
+          labels: 'version updates'
+          body: ${{ steps.covector.outputs.change }}
+          sign-commits: true
