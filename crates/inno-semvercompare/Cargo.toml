@@ -1,6 +1,6 @@
 [package]
 name = "inno-semvercompare"
-version = "0.1.0"
+version = "0.0.0"
 description = "UTF-16 semantic version precedence for Inno Setup utilities"
 edition.workspace = true
 rust-version.workspace = true
