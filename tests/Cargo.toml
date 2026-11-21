@@ -1,0 +1,11 @@
+[package]
+name = "inno-integration-tests"
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[[test]]
+name = "plugins"
+path = "plugins.rs"
