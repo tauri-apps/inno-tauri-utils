@@ -15,11 +15,14 @@ $targets = [ordered]@{
 }
 $checksums = @()
 
+# Separate the checksums from the changelog in Covector's release notes.
+Write-Output "`n---`n"
+
 foreach ($arch in $targets.Keys) {
     $dll = "$root/target/$($targets[$arch])/release/$Package.dll"
     $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $dll).Hash.ToLowerInvariant()
     $checksums += "$hash  $basename-$arch.dll"
-    Write-Output "- SHA256 ($arch): $hash"
+    Write-Output ('- SHA256 ({0}): `{1}`' -f $arch, $hash)
 }
 
 [IO.File]::WriteAllText("$root/target/$basename.sha256", ($checksums -join "`n") + "`n")
